@@ -65,7 +65,7 @@ usage: sib-scan.sh [OPTION]...
 
   5
   Use another sqlite path:
-  ./sib-scan.sh -b 3 -d /tmp/myoutput.sqlite
+  ./sib-scan.sh -b 3 -D /tmp/myoutput.sqlite
 ```
 
 ### LimeSDR usage
