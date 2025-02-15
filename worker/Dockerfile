@@ -1,32 +1,25 @@
-FROM ubuntu:focal
+FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt install -y software-properties-common git
-
 # UHD/lime drivers
-RUN add-apt-repository -y ppa:pothosware/framework && \
-    add-apt-repository -y ppa:pothosware/support && \
-    add-apt-repository -y ppa:myriadrf/drivers && \
-    add-apt-repository -y ppa:ettusresearch/uhd && \
-    apt update
-
-RUN apt install -y --no-install-recommends \
-    libuhd-dev libuhd4.8.0 uhd-host \
+RUN apt update && apt install -y --no-install-recommends \
+    --no-install-suggests \
     soapysdr-tools libsoapysdr-dev \
     soapysdr-module-lms7 \
-    soapysdr-module-bladerf
+    uhd-soapysdr \
+    uhd-host libuhd-dev \
+    # build deps
+    git cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev \
+    libzmq3-dev libboost-system-dev libboost-test-dev libboost-thread-dev \
+    g++ make pkg-config libpython2-dev swig libi2c-dev \
+    libboost-program-options-dev libconfig++-dev libusb-1.0-0-dev swig \
+    && rm -rf /var/lib/apt/lists/*
+
 
 ENV UHD_IMAGES_DIR=/usr/share/uhd/images/
 
 RUN uhd_images_downloader
-
-# build deps
-RUN apt install -y --no-install-recommends \
-    cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev \
-    libzmq3-dev libboost-system-dev libboost-test-dev libboost-thread-dev \
-    g++ make pkg-config libpython2-dev python-numpy swig libi2c-dev \
-    libboost-program-options-dev libconfig++-dev libusb-1.0-0-dev swig
 
 # Get srsLTE, compile and install
 RUN git clone https://github.com/srsran/srsRAN_4G
