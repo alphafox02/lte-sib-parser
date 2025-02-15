@@ -2,49 +2,31 @@ FROM ubuntu:focal
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt update && apt install -y software-properties-common
+RUN apt update && apt install -y software-properties-common git
 
-# UHD drivers for USRP
-RUN add-apt-repository -y ppa:ettusresearch/uhd && \
-    add-apt-repository -y ppa:nuandllc/bladerf && \
+# UHD/lime drivers
+RUN add-apt-repository -y ppa:pothosware/framework && \
+    add-apt-repository -y ppa:pothosware/support && \
     add-apt-repository -y ppa:myriadrf/drivers && \
-    apt update && \
-    apt install -y \
-    bladerf libbladerf-dev \
+    add-apt-repository -y ppa:ettusresearch/uhd && \
+    apt update
+
+RUN apt install -y --no-install-recommends \
     libuhd-dev libuhd4.8.0 uhd-host \
-    # build dependencies
-    cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev git \
-    libzmq3-dev libboost-system-dev libboost-test-dev libboost-thread-dev libqwt-qt5-dev qtbase5-dev \
-    software-properties-common g++ make pkg-config libpython2-dev python-numpy swig libi2c-dev \
-    libboost-program-options-dev libconfig++-dev libusb-1.0-0-dev libpython3-dev python3-numpy swig \
-    && rm -rf /var/lib/apt/lists/*
+    soapysdr-tools libsoapysdr-dev \
+    soapysdr-module-lms7 \
+    soapysdr-module-bladerf
 
 ENV UHD_IMAGES_DIR=/usr/share/uhd/images/
 
-# Download UHD images using the built-in uhd_images_downloader
 RUN uhd_images_downloader
 
-# Get SoapySDR, compile and install
-RUN git clone https://github.com/pothosware/SoapySDR.git && \
-    cd SoapySDR && \
-    git checkout 637023d5e1b60e117a6533daddc4d991a33375f9 && \
-    mkdir build && cd build && \
-    cmake ../ && make && make install && \
-    ldconfig
-
-# Get Limesuite, compile and install
-RUN git clone https://github.com/myriadrf/LimeSuite.git && \
-    cd LimeSuite && \
-    git checkout tags/v22.09.1 -b v22.09.1 && \
-    mkdir builddir && cd builddir && \
-    cmake ../ && make && make install && \
-    ldconfig
-
-RUN git clone https://github.com/pothosware/SoapyBladeRF.git && \
-    cd SoapyBladeRF && \
-    mkdir build && cd build && \
-    cmake .. && make && make install && \
-    ldconfig
+# build deps
+RUN apt install -y --no-install-recommends \
+    cmake libfftw3-dev libmbedtls-dev libboost-program-options-dev libconfig++-dev libsctp-dev \
+    libzmq3-dev libboost-system-dev libboost-test-dev libboost-thread-dev \
+    g++ make pkg-config libpython2-dev python-numpy swig libi2c-dev \
+    libboost-program-options-dev libconfig++-dev libusb-1.0-0-dev swig
 
 # Get srsLTE, compile and install
 RUN git clone https://github.com/srsran/srsRAN_4G
